@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="author" content>
+
+    <title>Implicits Resolution</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="../css/clean-blog.min.css" rel="stylesheet">
+
+    <!-- My CSS -->
+    <link href="../css/custom.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+      <![endif]-->
+
+  </head>
+
+  <body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <!--<a class="navbar-brand" href="index.html">Start Bootstrap</a>-->
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="../index.html">Home</a>
+            </li>
+            <li>
+              <a href="http://www.luigiantonini.it">About</a>
+            </li>
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+
+    <!-- Header and Main Content -->
+    <!-- Page Header -->
+<!-- Set your background image for this header on the line below. -->
+<header class="intro-header" style="background-image: url('../../img/post-bg.jpg')">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="post-heading">
+          <h1>Implicits Resolution</h1>
+          <h2 class="subheading">Type Level Programming in Scala step by step</h2>
+          <span class="meta">Posted  by Luigi  on 2015-11-07 </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+ 
+<article>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <p>Implicits are a very important feature in Scala, they are used basically in 2 main ways:</p>
+<ul>
+<li>implicit parameters</li>
+<li>implicit conversions</li>
+</ul>
+<p>The implicit conversions are very useful in some cases, however not too interesting for what I’m going to talk about so I will focus only on implicit parameters here, this is an interesting article about them <a href="http://www.cakesolutions.net/teamblogs/demystifying-implicits-and-typeclasses-in-scala" class="uri">http://www.cakesolutions.net/teamblogs/demystifying-implicits-and-typeclasses-in-scala</a></p>
+<h2 id="implicit-parameters">Implicit Parameters</h2>
+<p>This is what is interesting for us because implicits are used heavily to do TLP, so we need to understand how they work.</p>
+<p>The basic idea of implicit parameters is simple, we declare a function that takes a implicit parameter and if there is a unique valid implicit instance available in the scope, the function will take it automatically and we won’t need to pass it explicitly.</p>
+<pre><code>  implicit val value = 3
+  def foo(implicit i: Int) = println(i)
+  foo</code></pre>
+<p>This will print 3, nothing interesting so far, this technique is mostly used when we need some kind of context, a typical example is the <code>ExecutionContext</code> that we need when we use <code>Future</code>, <code>Fuuture.map</code> for instance is defined in this way: <code>def map[S](f: T =&gt; S)(implicit executor: ExecutionContext): Future[S]</code></p>
+<p>Let’s go now into the interesting part, implicits parameters are resolved also when we add type parameters:</p>
+<pre><code>  trait Printer[T] {
+    def print(t: T): String
+  }
+
+  implicit val sp: Printer[Int] = new Printer[Int] {
+    def print(i :Int) = i.toString
+  }
+
+  def foo[T](t: T)(implicit p: Printer[T]) = p.print(t)
+
+  val res = foo(3)
+  // val res = foo(false)
+  println(s&quot;res: ${res}&quot;)</code></pre>
+<p>From this example wee see that the compiler is able to resolve implicits even when there are types parameters, and indeed <code>foo(3)</code> will work properly, while for instance <code>foo(true)</code> won’t compile because there isn’t an instance of <code>Printer[Boolean]</code> available in scope, note that we don’t need to specify the type of <code>T</code>, thanks to the type inference the compiler is able to figure it out, and look for the appropriate <code>Printer</code> instance.</p>
+<p>An important thing to remember is that the compiler, when looking for an implicit for a certain type, <code>Printer</code> in the example, will look automatically in his companion object, so we can rewrite this example in this way:</p>
+<pre><code>  trait Printer[T] {
+    def print(t: T): String
+  }
+
+  object Printer {
+    implicit val sp: Printer[Int] = new Printer[Int] {
+      def print(i :Int) = i.toString
+    }
+  }</code></pre>
+<p>An interesting thing is that the resolution works even if not all the type parameters are known:</p>
+<pre><code>  trait Resolver[T, R] {
+    def resolve(t: T): R
+  }
+ 
+  object Resolver {
+    implicit val ib: Resolver[Int, Boolean] = new Resolver[Int, Boolean] {
+      def resolve(i :Int): Boolean = i &gt; 1
+    }
+    implicit val sd: Resolver[String, Double] = new Resolver[String, Double] {
+      def resolve(i :String): Double = i.length.toDouble
+    }
+  }
+
+  def foo[T, R](t: T)(implicit p: Resolver[T, R]): R = p.resolve(t)
+
+  val res1: Boolean = foo(3)
+  val res2: Double = foo(&quot;ciao&quot;)</code></pre>
+<p>As we can see, the function <code>foo</code> now takes two types parameters,<code>T</code> and <code>R</code>, but only <code>T</code> is extracted from the parameter <code>t</code> that we pass, <code>R</code> is instead computed from the implicit resolution, and then we can use it as return type, <code>res1</code> and <code>res2</code> have indeed two different types, depending on the input that we passed. Using implicits here we have been able to do something similar to what we did before with <a href="abstract-types.html">Abstract Types</a>, and we can do much more when we combine this techniques together as we will see later.</p>
+<h2 id="type-classes">Type Classes</h2>
+<p>Now that we know how to use type parameters and implicits together we can give to this a name, this technique is called Type Classes, in Scala it is a pattern but in Haskell is a language feature, is the way polymorphism is implemented in Haskell, there is a lot of material about it and I suggest to spent some time understanding it properly..</p>
+<h2 id="implicit-recursion">Implicit Recursion</h2>
+<p>Another important aspect about implicits is that the resolution doesn’t stop at the first level, we can have functions that take implicit parameters that are resolved through other functions that take implicit parameters themselves and so on, until the resolution goes to a stable value, this is also a very good way to kill the compiler!</p>
+<pre><code>  trait Printer[T] {
+    def print(t: T): String
+  }
+
+  object Printer {
+    implicit val intPrinter: Printer[Int] = new Printer[Int] {
+      def print(i: Int) = s&quot;$i: Int&quot;
+    }
+
+    implicit def optionPrinter[V](implicit pv: Printer[V]): Printer[Option[V]] =
+      new Printer[Option[V]] {
+        def print(ov: Option[V]) = ov match {
+          case None =&gt; &quot;None&quot;
+          case Some(v) =&gt; s&quot;Option[${pv.print(v)}]&quot;
+        }
+      }
+
+    implicit def listPrinter[V](implicit pv: Printer[V]): Printer[List[V]] =
+      new Printer[List[V]] {
+        def print(ov: List[V]) = ov match {
+          case Nil =&gt; &quot;Nil&quot;
+          case l: List[V] =&gt; s&quot;List[${l.map(pv.print).mkString(&quot;, &quot;)}]&quot;
+        }
+      }
+  }
+
+  def print[T](t: T)(implicit p: Printer[T]) = p.print(t)
+
+  val res = print(Option(List(1, 3, 6)))
+  println(s&quot;res: ${res}&quot;)
+
+  // res: Option[List[1: Int, 3: Int, 6: Int]]</code></pre>
+<p>The example should explain how that works, first we defined <code>intPrinter</code> which is an implicit <code>val</code> similar to the ones in the previous examples, now we go to the interesting ones, <code>optionPrinter</code> and <code>listPrinter</code> are not printer for a specific type like <code>Int</code>, they are printer for containers type, <code>Option</code> and <code>List</code>, which both take a type parameter.</p>
+<p>So in this case what we do is defining the printer as a <code>def</code> we add a new type parameter <code>V</code>, and we resolve the printer for the type <code>V</code> that we can use to print the content of our containers, as we can see this is a recursion, the compiler we’ll be able to resolve the printer for <code>V</code> until it finds an implicit <code>val</code> that stops the resolution.</p>
+<p>Le us see what happens when we call <code>print(Option(List(1, 3, 6)))</code> in this example:</p>
+<ul>
+<li>the first type to be resolve is <code>Option[V]</code>, so we get <code>optionPrinter</code> and in this case <code>V = List</code></li>
+<li>the compiler then will look for a Printer[List] and resolves <code>listPrinter</code> and now we have <code>V = Int</code></li>
+<li>and finally we hit Printer[Int] which is a <code>val</code> and the recursion stops</li>
+</ul>
+<p>the result is indeed <code>Option[List[1: Int, 3: Int, 6: Int]]</code></p>
+<p>This mechanism is very important to do type level computations, we’ll see later how, remember that to do that there is compile time overhead but also runtime, because we’ll have to instantiate a <code>Printer</code> instance per cycle.</p>
+      </div>
+    </div>
+  </div>
+</article>
+
+<hr>
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <h3>
+        Contents
+      </h3>
+      <ul>
+        <li>
+  <a href="../tlp-step-by-step/introduction.html">Introduction</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/dependent-types.html">Dependent Types</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/abstract-types.html">Abstract Types</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/infix-operator.html">Infix Operator</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/phantom-types.html">Phantom Types</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/implicits-resolution.html">Implicits Resolution</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/implicitly-type-equality.html">Implicitly and Type Equality</a>
+</li>
+
+        <li>Recursive Data Structure</li>
+        <li><a href="../posts/2015/09/13/aux-pattern.html">Aux Pattern</a></li>
+        <li>Type Level Pattern Matching and Recursion</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<hr>
+<div class="container">
+  <div class"row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <div id="disqus_thread"></div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  /* * * CONFIGURATION VARIABLES * * */
+  var disqus_shortname = 'gigiigig';
+
+  /* * * DON'T EDIT BELOW THIS LINE * * */
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+
+  })();
+</script>
+<noscript>
+  Please enable JavaScript to view the 
+  <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+</noscript>
+
+
+ 
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <ul class="list-inline text-center">
+              <li>
+                <a href="https://twitter.com/gigi_igig">
+                  <span class="fa-stack fa-lg">
+                    <i class="fa fa-circle fa-stack-2x"></i>
+                    <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/gigiigig">
+                  <span class="fa-stack fa-lg">
+                    <i class="fa fa-circle fa-stack-2x"></i>
+                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://www.linkedin.com/in/luigiantonini">
+                  <span class="fa-stack fa-lg">
+                    <i class="fa fa-circle fa-stack-2x"></i>
+                    <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+            </ul>
+            <p class="copyright text-muted">
+              Copyright &copy; Luigi Antonini 2015 | Powered by <a href="http://jaspervdj.be/hakyll/">Hakyll</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="../js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../js/bootstrap.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="../js/clean-blog.min.js"></script>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-11575111-6', 'auto');
+      ga('send', 'pageview');
+    </script>
+  </body>
+
+</html>

@@ -9,16 +9,16 @@
     <meta name="description" content>
     <meta name="author" content>
 
-    <title>The Aux Pattern</title>
+    <title>Infix Operator</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="../../../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="../../../../css/clean-blog.min.css" rel="stylesheet">
+    <link href="../css/clean-blog.min.css" rel="stylesheet">
 
     <!-- My CSS -->
-    <link href="../../../../css/custom.css" rel="stylesheet">
+    <link href="../css/custom.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -54,7 +54,7 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav navbar-right">
             <li>
-              <a href="../../../../index.html">Home</a>
+              <a href="../index.html">Home</a>
             </li>
             <li>
               <a href="http://www.luigiantonini.it">About</a>
@@ -69,80 +69,85 @@
     <!-- Header and Main Content -->
     <!-- Page Header -->
 <!-- Set your background image for this header on the line below. -->
-<header class="intro-header" style="background-image: url('../../../../img/post-bg.jpg')">
+<header class="intro-header" style="background-image: url('../../img/post-bg.jpg')">
   <div class="container">
     <div class="row">
       <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
         <div class="post-heading">
-          <h1>The Aux Pattern</h1>
-          <h2 class="subheading">A short introduction to the `Aux` pattern</h2>
-          <span class="meta">Posted  by Luigi  on September 13, 2015 </span>
+          <h1>Infix Operator</h1>
+          <h2 class="subheading">Type Level Programming in Scala step by step</h2>
+          <span class="meta">Posted  by Luigi  on 2015-11-02 </span>
         </div>
       </div>
     </div>
   </div>
 </header>
-
+ 
 <article>
   <div class="container">
     <div class="row">
       <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-        <p>Let’s start saying that the <code>Aux</code> pattern is not a pattern, is a technique used in every library that is doing some type level programming that we need to use to overcome one Scala limitation.</p>
-<p>Every time we do a type level computation in Scala we have a type alias defined inside another class/trait, let’s see an example</p>
-<pre><code>trait Foo[A] {
-  type B
-  def value: B
-}</code></pre>
-<p>In this case for instance the result of our type level computation will be stored in <code>B</code>.</p>
-<p>So let’s define some instances:</p>
-<pre><code>implicit def fi = new Foo[Int] {
-  type B = String
-  val value = &quot;Foo&quot;
-}
-implicit def fs = new Foo[String] {
-  type B = Boolean
-  val value = false
-}</code></pre>
-<p>Well, in this case we are not doing any real computation, we are just changing the type of <code>B</code> depending on the input type <code>A</code> , that’s enough to understand <code>Aux</code>.</p>
-<p>Now in Scala we can use parameter dependent types to access the type defined inside a class/trait (path dependent type) so if we want to use our type <code>B</code> in a function, as a return type, we can do that:</p>
-<pre><code>  def foo[T](t: T)(implicit f: Foo[T]): f.B = f.value
-  val res1: String = foo(2)
-  val res2: Boolean = foo(&quot;&quot;)</code></pre>
-<p>In this example we see that we can change the return type of a function using dependent type and the implicit resolution, now let’s suppose that we want to use this type as type parameter in the next parameter, for instance to get the Monoid instance for that type:</p>
-<pre><code>  import scalaz._, Scalaz._
+        <p>This is going to be a very quick one, it’s a small syntax detail that might be confusing if you don’t know it.</p>
+<p>In Scala we can use the infix notation for methods:</p>
+<pre><code>  object Foo {
+    def bar(s: String) = println(s)
+  }
 
-  def foo[T](t: T)
-            (implicit f: Foo[T], m: Monoid[f.B]): f.B = m.zero</code></pre>
-<p>We would like to do that, but unfortunately we get</p>
-<pre><code>illegal dependent method type: parameter appears in the type of another parameter in the same section or an earlier one</code></pre>
-<p>Scala tells us that we can’t use the dependent type in the same section, we can use it in the next parameters block or as a return type only.</p>
-<p>Here is where our friend <code>Aux</code> is going to help, let’s define it:</p>
-<pre><code>  type Aux[A0, B0] = Foo[A0] { type B = B0  }</code></pre>
-<p>What we are doing here is defining a type alias where <code>A0</code> is mapped to Foo <code>A</code> and <code>B0</code> is mapped to <code>type B</code>, what I didn’t understand at the beginning is that the relation <code>type B = B0</code> works both ways, so if we fix the type for <code>B</code> like with <code>type B = Boolean</code>, <code>B0</code> will get this type too.</p>
-<p>So now we can write this:</p>
-<pre><code>  def foo[T, R](t: T)(implicit f: Foo.Aux[T, R], m: Monoid[R]): R = m.zero 
-  val res1: String = foo(2)
-  val res2: Boolean = foo(&quot;&quot;)</code></pre>
-<p>The full example is here <a href="https://gist.github.com/gigiigig/3cd104e8951b4432afd5">Gist</a></p>
-<p>That’s it, basically <code>Aux</code> is just a way to extract the result of a type level computation, now let’s have a look at a real world example, the most common example that comes to my mind is shapeless Generic,</p>
-<pre><code>def length[T, R &lt;: HList](t: T)
-                         (implicit g: Generic.Aux[T, R],
-                                   l: Length[R]): l.Out = l()
+  Foo.bar(&quot;hello&quot;) // standard
+  Foo bar &quot;hello&quot;  // infix </code></pre>
+<p>In the same way we can use the infix operator for types, basically what we can do is:</p>
+<pre><code>  trait Foo[A, B]
 
-case class Foo(i: Int, s: String, b: Boolean)
-val foo = Foo(1, &quot;&quot;, false)
+  type Test1 = Foo[Int, String] // standard
+  type Test2 = Int Foo String   // infix</code></pre>
+<p>The declarations in <code>Test1</code> and <code>Test2</code> are equivalent and valid, there is another thing that is possible to do which is to use symbols in type names the same way we can use them in method names, so if you ever tried to take a look at shapeless code, this is going to be more familiar now:</p>
+<pre><code>  trait ::[A, B]
 
-val res = length(foo)
-println(s&quot;res: ${Nat.toInt(res)}&quot;)
-
-// res: 3</code></pre>
-<p>In this case <code>Generic.Aux</code> will extract the generic representation of <code>T</code> inside <code>R</code> and in this way we can use it to resolve the <code>Length</code> type class that we use to get the length of the <code>Hlist</code>.</p>
-<h3 id="conclusion">Conclusion</h3>
-<p><code>Aux</code> is a very simple technique that is mandatory when you start doing some type level programming, probably is that simple that nobody needed to write a tutorial about it so far, but because it took to me some effort to understand it, maybe that can help somebody.</p>
+  type Test3 = ::[Int, String]
+  type Test4 = Int :: String</code></pre>
+<p>That’s it, nothing really hard in this post but this is a small detail that can create big confusion, at least it did for me, if you are not aware of it.</p>
       </div>
     </div>
   </div>
 </article>
+
+<hr>
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <h3>
+        Contents
+      </h3>
+      <ul>
+        <li>
+  <a href="../tlp-step-by-step/introduction.html">Introduction</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/dependent-types.html">Dependent Types</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/abstract-types.html">Abstract Types</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/infix-operator.html">Infix Operator</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/phantom-types.html">Phantom Types</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/implicits-resolution.html">Implicits Resolution</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/implicitly-type-equality.html">Implicitly and Type Equality</a>
+</li>
+
+        <li>Recursive Data Structure</li>
+        <li><a href="../posts/2015/09/13/aux-pattern.html">Aux Pattern</a></li>
+        <li>Type Level Pattern Matching and Recursion</li>
+      </ul>
+    </div>
+  </div>
+</div>
 
 <hr>
 <div class="container">
@@ -215,13 +220,13 @@ println(s&quot;res: ${Nat.toInt(res)}&quot;)
     </footer>
 
     <!-- jQuery -->
-    <script src="../../../../js/jquery.min.js"></script>
+    <script src="../js/jquery.min.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
-    <script src="../../../../js/bootstrap.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
 
     <!-- Custom Theme JavaScript -->
-    <script src="../../../../js/clean-blog.min.js"></script>
+    <script src="../js/clean-blog.min.js"></script>
 
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

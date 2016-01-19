@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="author" content>
+
+    <title>Introduction</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="../css/clean-blog.min.css" rel="stylesheet">
+
+    <!-- My CSS -->
+    <link href="../css/custom.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+      <![endif]-->
+
+  </head>
+
+  <body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <!--<a class="navbar-brand" href="index.html">Start Bootstrap</a>-->
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="../index.html">Home</a>
+            </li>
+            <li>
+              <a href="http://www.luigiantonini.it">About</a>
+            </li>
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+
+    <!-- Header and Main Content -->
+    <!-- Page Header -->
+<!-- Set your background image for this header on the line below. -->
+<header class="intro-header" style="background-image: url('../../img/post-bg.jpg')">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="post-heading">
+          <h1>Introduction</h1>
+          <h2 class="subheading">Type Level Programming in Scala step by step</h2>
+          <span class="meta">Posted  by Luigi  on 2015-10-19 </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+ 
+<article>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <p>Let us start this series of blog posts describing what we are going to talk about and also why, I mean why should we bother with this stuff?</p>
+<p>I think the definition <code>Type Level Programming (TLP)</code> is quite self explanatory, simply means doing computations at type level, but probably for people like me, coming from Java, that might sound a bit crazy at the beginning.</p>
+<!--
+First thing, I'd suggest to Java developers to try to forget what
+you know about types, and accept the idea that in Scala you can do much more than you used to in Java. 
+-->
+<h2 id="why">Why</h2>
+<p>Simple, because it is fun!</p>
+<p>Well that too, but the important part to me here is to understand that<br />
+<em><strong>stronger is your type system more flexibility you get</strong></em><br />
+that could sound a bit a counterintuitive, but stay with me for a minute. One of the reasons why many <em>dynamic developers</em> criticize Java is that adding types you lose a lot of flexibility, this is partially true, but the great thing is that adding more power to your type system you get back this flexibility, and with a big advantage!</p>
+<p>The advantage is that you can do <em>dynamic-like</em> things at compile time! This is where you need type level computations, if you can compute types, you get an incredible flexibility without losing the correctness that you get with a static language.</p>
+<p>Let me stop the ranting now and show an example to understand what I mean with that, just try to focus on the advantages more than the implementation for now, we will go into the details soon. I chose this example mainly because it is the one that amazed me first, and made me start looking into TLP.</p>
+<p>This code is taken from the <strong>Spray</strong> documentation, it is part of the routing DSL that it offers:</p>
+<pre><code>parameters('color, 'count.as[Int]) { 
+  (color, count) =&gt; ... 
+}
+parameters('color, 'bgColor.?, 'count.as[Int]) { 
+  (color, bgColor, count) =&gt; ... 
+}</code></pre>
+<p>The code shows the <code>parameters</code> directive, it is an http directive that we use to get the parameters from the request. What we do is pass a list of parameters, that we want to read, in the first parameters block, and then we pass a function that uses these parameters in the second.</p>
+<p>Now maybe this doesn’t seem special at a first look, but let us make the types explicit:</p>
+<pre><code>parameters('color, 'count.as[Int]) { 
+  (color: String, count: Int) =&gt; ... 
+}
+parameters('color, 'bgColor.?, 'count.as[Int]) { 
+  (color: String, bgColor: Option[String], count: Int) =&gt; ... 
+}</code></pre>
+<p>Looking at this example we can see that</p>
+<ul>
+<li><p>we get a function that takes the same number of parameters that we ask, and we are not using pattern matching on a partial function, this is a total function</p></li>
+<li><p>the parameters in the function have the type that we asked for<br />
+ <code>'color =&gt; String</code><br />
+ <code>'bgColor.?' =&gt; Option[String]</code><br />
+ <code>'cound.as[Int] =&gt; Int</code></p></li>
+</ul>
+<p>We can see now that we are computing 2 things here, the number of parameters that we take, and their types. If you look at the code you’ll see that <code>paramters</code> is not defined with some crazy method overload, there is a type level computation (which is still crazy probably ;) that is able to compute the right type for the function <code>f</code>.</p>
+<p>I think this has an incredible value, things like this before were common only for dynamic languages, or we had to use reflection to do something similar in Java, but in Scala we can do this at compile time, and don’t have to give up on correctness, and this is a very good reason to do TLP in my opinion.</p>
+<h2 id="shapeless">Shapeless</h2>
+<p>When talking about TLP in Scala it is mandatory to mention Shapeless, it is the library that pushed the boundaries of what is possible to do in Scala with types, many of the examples that we are going to see at the end are based on Shapeless, and basically every library that is relying on TLP depends on Shapeless.</p>
+<h2 id="how-to-read">How to read</h2>
+<p>The idea I have for this series is to cover before all the techniques that you need to know to do type level programming in Scala, and then show some complete examples about how to apply them for real world use cases, so there isn’t a particular order to read the articles, feel free to jump directly to the ones you feel useful for you.</p>
+<h2 id="help-me">Help Me!</h2>
+<p>I’m not a TLP expert, writing this series is a way for me to revise all this concepts and to help other people to learn them, however there might be errors, things that I misunderstood or even English errors as it is not my native language, feel free to add comments here or open a pull request in GitHub, the code of this website is open source.</p>
+<p>Ok then, let’s start!</p>
+      </div>
+    </div>
+  </div>
+</article>
+
+<hr>
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <h3>
+        Contents
+      </h3>
+      <ul>
+        <li>
+  <a href="../tlp-step-by-step/introduction.html">Introduction</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/dependent-types.html">Dependent Types</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/abstract-types.html">Abstract Types</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/infix-operator.html">Infix Operator</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/phantom-types.html">Phantom Types</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/implicits-resolution.html">Implicits Resolution</a>
+</li>
+<li>
+  <a href="../tlp-step-by-step/implicitly-type-equality.html">Implicitly and Type Equality</a>
+</li>
+
+        <li>Recursive Data Structure</li>
+        <li><a href="../posts/2015/09/13/aux-pattern.html">Aux Pattern</a></li>
+        <li>Type Level Pattern Matching and Recursion</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<hr>
+<div class="container">
+  <div class"row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <div id="disqus_thread"></div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  /* * * CONFIGURATION VARIABLES * * */
+  var disqus_shortname = 'gigiigig';
+
+  /* * * DON'T EDIT BELOW THIS LINE * * */
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+
+  })();
+</script>
+<noscript>
+  Please enable JavaScript to view the 
+  <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+</noscript>
+
+
+ 
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <ul class="list-inline text-center">
+              <li>
+                <a href="https://twitter.com/gigi_igig">
+                  <span class="fa-stack fa-lg">
+                    <i class="fa fa-circle fa-stack-2x"></i>
+                    <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/gigiigig">
+                  <span class="fa-stack fa-lg">
+                    <i class="fa fa-circle fa-stack-2x"></i>
+                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://www.linkedin.com/in/luigiantonini">
+                  <span class="fa-stack fa-lg">
+                    <i class="fa fa-circle fa-stack-2x"></i>
+                    <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+            </ul>
+            <p class="copyright text-muted">
+              Copyright &copy; Luigi Antonini 2015 | Powered by <a href="http://jaspervdj.be/hakyll/">Hakyll</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="../js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../js/bootstrap.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="../js/clean-blog.min.js"></script>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-11575111-6', 'auto');
+      ga('send', 'pageview');
+    </script>
+  </body>
+
+</html>
