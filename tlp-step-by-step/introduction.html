@@ -97,8 +97,8 @@ you know about types, and accept the idea that in Scala you can do much more tha
 <p>Simple, because it is fun!</p>
 <p>Well that too, but the important part to me here is to understand that<br />
 <em><strong>stronger is your type system more flexibility you get</strong></em><br />
-that could sound a bit a counterintuitive, but stay with me for a minute. One of the reasons why many <em>dynamic developers</em> criticize Java is that adding types you lose a lot of flexibility, this is partially true, but the great thing is that adding more power to your type system you get back this flexibility, and with a big advantage!</p>
-<p>The advantage is that you can do <em>dynamic-like</em> things at compile time! This is where you need type level computations, if you can compute types, you get an incredible flexibility without losing the correctness that you get with a static language.</p>
+that could sound a bit a counterintuitive, but stay with me for a minute. One of the reasons why many <em>“dynamic developers”</em> criticize Java is that adding types you lose a lot of flexibility, this is partially true, but the great thing is that adding more power to your type system you get back this flexibility, and with a big advantage!</p>
+<p>The advantage is that you can do <em>dynamic-like</em> things at compile time! This is where you need type level computations, if you can compute types, you get an incredible flexibility without losing the correctness that you get with a static language and actually you get even more.</p>
 <p>Let me stop the ranting now and show an example to understand what I mean with that, just try to focus on the advantages more than the implementation for now, we will go into the details soon. I chose this example mainly because it is the one that amazed me first, and made me start looking into TLP.</p>
 <p>This code is taken from the <strong>Spray</strong> documentation, it is part of the routing DSL that it offers:</p>
 <pre><code>parameters('color, 'count.as[Int]) { 
@@ -126,11 +126,12 @@ parameters('color, 'bgColor.?, 'count.as[Int]) {
 <p>We can see now that we are computing 2 things here, the number of parameters that we take, and their types. If you look at the code you’ll see that <code>paramters</code> is not defined with some crazy method overload, there is a type level computation (which is still crazy probably ;) that is able to compute the right type for the function <code>f</code>.</p>
 <p>I think this has an incredible value, things like this before were common only for dynamic languages, or we had to use reflection to do something similar in Java, but in Scala we can do this at compile time, and don’t have to give up on correctness, and this is a very good reason to do TLP in my opinion.</p>
 <h2 id="shapeless">Shapeless</h2>
-<p>When talking about TLP in Scala it is mandatory to mention Shapeless, it is the library that pushed the boundaries of what is possible to do in Scala with types, many of the examples that we are going to see at the end are based on Shapeless, and basically every library that is relying on TLP depends on Shapeless.</p>
+<p>When talking about TLP in Scala it is mandatory to mention Shapeless, it is the library that pushed the boundaries of what is possible to do in Scala with types, many of the examples that we are going to see later are based on Shapeless, and basically every library that is relying on TLP depends on Shapeless.</p>
 <h2 id="how-to-read">How to read</h2>
 <p>The idea I have for this series is to cover before all the techniques that you need to know to do type level programming in Scala, and then show some complete examples about how to apply them for real world use cases, so there isn’t a particular order to read the articles, feel free to jump directly to the ones you feel useful for you.</p>
-<h2 id="help-me">Help Me!</h2>
-<p>I’m not a TLP expert, writing this series is a way for me to revise all this concepts and to help other people to learn them, however there might be errors, things that I misunderstood or even English errors as it is not my native language, feel free to add comments here or open a pull request in GitHub, the code of this website is open source.</p>
+<h2 id="help-me-this-is-still-a-wip">Help Me, this is still a WIP!</h2>
+<p>This is not finished, I have in mind still a few posts that I hope to write soon, if there is something that you would like me to add feel free to ask.</p>
+<p>It’s also very important to say that I’m not a TLP expert, writing this series is a way for me to revise all this concepts and to help other people to learn them, however there might be errors, things that I misunderstood or even English errors as it is not my native language, feel free to add comments here or open a pull request in <a href="https://github.com/gigiigig/blog">GitHub</a>, the code of this website is open source .</p>
 <p>Ok then, let’s start!</p>
       </div>
     </div>

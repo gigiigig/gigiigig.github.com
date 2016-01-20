@@ -87,7 +87,7 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-        <p>In the previous example we have seen Dependent Types, what they are and what we have in Scala, now we are going to see another Scala feature that together with Dependent Types and Implicits gives us a lot of power.</p>
+        <p>In the previous post we have seen Dependent Types, what they are and what we have in Scala, now we are going to see another Scala feature that together with Dependent Types and Implicits gives us a lot of power.</p>
 <p>An Abstract Type is a type that is not known yet and we can define later, it is defined with the keyword <code>type</code>, it basically works for types like the <code>def</code> keyword works for values:</p>
 <pre><code>trait Foo {
   def foo: String
@@ -118,7 +118,8 @@ def getValue(f: Foo): f.T = f.value
 
 val fs: String = getValue(FooString)
 val fi: Int = getValue(FooInt)</code></pre>
-<p>I think this is the first very interesting example that we meet, the trait <code>Foo</code> has an abstract type <code>T</code> that we define only inside his implementations with different types, and then the function <code>getValue</code> is able to change his return type depending on the input that we pass, we are very far from our goal but this our first step toward TLP!</p>
+<p>I think this is the first very interesting example that we meet, the trait <code>Foo</code> has an abstract type <code>T</code> that we define only inside his implementations with different types, in <code>FooString -&gt; T = String</code> and in <code>FooInt -&gt; T = Int</code>, and then the function <code>getValue</code> is able to change his return type depending on the input that we pass.</p>
+<p>In the example we can see indeed that we are defining two <code>val</code>, <code>fs</code> and <code>fi</code>, both implemented calling <code>getValue</code> but passing two different implementations of <code>Foo</code> and they have different types, <code>fs</code> has type <code>String</code> and <code>fi</code> has type <code>Int</code></p>
 <h3 id="type-is-not-an-alias"><code>type</code> is not an alias!</h3>
 <p>For some reason the <code>type</code> keyword is often referred as <em>type alias</em> , this name is a bit confusing, <code>type</code> is not only an alias, for instance when before we declared</p>
 <p><code>type T = String</code> we could say that <code>T</code> is an alias</p>
@@ -126,7 +127,7 @@ val fi: Int = getValue(FooInt)</code></pre>
 <p><code>type Result[T] = Either[Sring, T]</code></p>
 <p>this is not just an alias anymore, it is actually a function, that takes <code>T</code> as parameter and returns <code>Either[String, T]</code> as a result.</p>
 <h3 id="connecting-the-dots">Connecting the dots</h3>
-<p>In this post we have seen how we can use Dependent Types and Abstract Types to change the return type of a function and also that the Abstract Types allow us to define functions at type level, and this two things together give us the basics of TLP.</p>
+<p>In this post we have seen how we can use Dependent Types and Abstract Types to change the return type of a function and also that the <code>type</code> keyword allows us to define functions at type level, and this things together give us the basics of TLP.</p>
       </div>
     </div>
   </div>
