@@ -123,10 +123,11 @@ parameters('color, 'bgColor.?, 'count.as[Int]) {
  <code>'bgColor.?' =&gt; Option[String]</code><br />
  <code>'cound.as[Int] =&gt; Int</code></p></li>
 </ul>
-<p>We can see now that we are computing 2 things here, the number of parameters that we take, and their types. If you look at the code you’ll see that <code>paramters</code> is not defined with some crazy method overload, there is a type level computation (which is still crazy probably ;) that is able to compute the right type for the function <code>f</code>.</p>
+<p>We can see now that we are computing 2 things here, the number of parameters that we take, and their types. If you look at the code you’ll see that <code>parameters</code> is not defined with some crazy method overload, there is a type level computation (which is still crazy probably ;) that is able to compute the right type for the function <code>f</code>.</p>
 <p>I think this has an incredible value, things like this before were common only for dynamic languages, or we had to use reflection to do something similar in Java, but in Scala we can do this at compile time, and don’t have to give up on correctness, and this is a very good reason to do TLP in my opinion.</p>
-<h2 id="shapeless">Shapeless</h2>
-<p>When talking about TLP in Scala it is mandatory to mention Shapeless, it is the library that pushed the boundaries of what is possible to do in Scala with types, many of the examples that we are going to see later are based on Shapeless, and basically every library that is relying on TLP depends on Shapeless.</p>
+<h2 id="libraries">Libraries</h2>
+<p>When talking about TLP in Scala it is mandatory to mention <a href="https://github.com/milessabin/shapeless">Shapeless</a>, it is the library that mostly pushed the boundaries of what is possible to do in Scala with types, many of the examples that we are going to see later are based on Shapeless, and many libraries that are relying on TLP depend on it.</p>
+<p>There are however other libraries that are relying on TLP, probably the most famous is <a href="http://slick.typesafe.com/">Slick</a>, this is a very good proof that TLP is actually useful in the real world and not only a pure technical exercise.</p>
 <h2 id="how-to-read">How to read</h2>
 <p>The idea I have for this series is to cover before all the techniques that you need to know to do type level programming in Scala, and then show some complete examples about how to apply them for real world use cases, so there isn’t a particular order to read the articles, feel free to jump directly to the ones you feel useful for you.</p>
 <h2 id="help-me-this-is-still-a-wip">Help Me, this is still a WIP!</h2>

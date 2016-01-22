@@ -89,22 +89,22 @@
       <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
         <p>This is going to be a very quick one, it’s a small syntax detail that might be confusing if you don’t know it.</p>
 <p>In Scala we can use the infix notation for methods:</p>
-<pre><code>  object Foo {
-    def bar(s: String) = println(s)
-  }
+<pre><code>object Foo {
+  def bar(s: String) = println(s)
+}
 
-  Foo.bar(&quot;hello&quot;) // standard
-  Foo bar &quot;hello&quot;  // infix </code></pre>
+Foo.bar(&quot;hello&quot;) // standard
+Foo bar &quot;hello&quot;  // infix </code></pre>
 <p>In the same way we can use the infix operator for types, basically what we can do is:</p>
-<pre><code>  trait Foo[A, B]
+<pre><code>trait Foo[A, B]
 
-  type Test1 = Foo[Int, String] // standard
-  type Test2 = Int Foo String   // infix</code></pre>
+type Test1 = Foo[Int, String] // standard
+type Test2 = Int Foo String   // infix</code></pre>
 <p>The declarations in <code>Test1</code> and <code>Test2</code> are equivalent and valid, there is another thing that is possible to do which is to use symbols in type names the same way we can use them in method names, so if you ever tried to take a look at shapeless code, this is going to be more familiar now:</p>
-<pre><code>  trait ::[A, B]
+<pre><code>trait ::[A, B]
 
-  type Test3 = ::[Int, String]
-  type Test4 = Int :: String</code></pre>
+type Test3 = ::[Int, String]
+type Test4 = Int :: String</code></pre>
 <p>That’s it, nothing really hard in this post but this is a small detail that can create big confusion, at least it did for me, if you are not aware of it.</p>
       </div>
     </div>

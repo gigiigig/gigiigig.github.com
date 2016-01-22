@@ -128,7 +128,8 @@ def ++[n, m, a](v1: Vect[n, a], v2: Vect[m, a]): Vect[(n + m), a] </code></pre>
 <p>Scala is not a fully dependently typed language and we have to forget some of the amazing things we can do with Idris, however Scala supports some form of Dependent Types and there is still a lot that we can do.</p>
 <h4 id="path-dependent-types">Path Dependent Types</h4>
 <p>That’s the main feature we have in Scala, let’s see how they work. In Scala we can define nested components, for instance we can define a class inside a trait, a trait inside a class and so on …</p>
-<pre><code>class Foo {                                                                      class Bar
+<pre><code>class Foo {
+  class Bar
 }
 
 val foo1 = new Foo
