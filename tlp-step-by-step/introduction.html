@@ -119,9 +119,9 @@ parameters('color, 'bgColor.?, 'count.as[Int]) {
 <ul>
 <li><p>we get a function that takes the same number of parameters that we ask, and we are not using pattern matching on a partial function, this is a total function</p></li>
 <li><p>the parameters in the function have the type that we asked for<br />
- <code>'color =&gt; String</code><br />
- <code>'bgColor.?' =&gt; Option[String]</code><br />
- <code>'cound.as[Int] =&gt; Int</code></p></li>
+<code>'color =&gt; String</code><br />
+<code>'bgColor.?' =&gt; Option[String]</code><br />
+<code>'cound.as[Int] =&gt; Int</code></p></li>
 </ul>
 <p>We can see now that we are computing 2 things here, the number of parameters that we take, and their types. If you look at the code you’ll see that <code>parameters</code> is not defined with some crazy method overload, there is a type level computation (which is still crazy probably ;) that is able to compute the right type for the function <code>f</code>.</p>
 <p>I think this has an incredible value, things like this before were common only for dynamic languages, or we had to use reflection to do something similar in Java, but in Scala we can do this at compile time, and don’t have to give up on correctness, and this is a very good reason to do TLP in my opinion.</p>
@@ -130,6 +130,8 @@ parameters('color, 'bgColor.?, 'count.as[Int]) {
 <p>There are however other libraries that are relying on TLP, probably the most famous is <a href="http://slick.typesafe.com/">Slick</a>, this is a very good proof that TLP is actually useful in the real world and not only a pure technical exercise.</p>
 <h2 id="how-to-read">How to read</h2>
 <p>The idea I have for this series is to cover before all the techniques that you need to know to do type level programming in Scala, and then show some complete examples about how to apply them for real world use cases, so there isn’t a particular order to read the articles, feel free to jump directly to the ones you feel useful for you.</p>
+<h2 id="credits">Credits</h2>
+<p>A special thanks goes to Alois Cochard <a href="https://twitter.com/aloiscochard">@aloiscochard</a> for teaching me this stuff and reviewing this series.</p>
 <h2 id="help-me-this-is-still-a-wip">Help Me, this is still a WIP!</h2>
 <p>This is not finished, I have in mind still a few posts that I hope to write soon, if there is something that you would like me to add feel free to ask.</p>
 <p>It’s also very important to say that I’m not a TLP expert, writing this series is a way for me to revise all this concepts and to help other people to learn them, however there might be errors, things that I misunderstood or even English errors as it is not my native language, feel free to add comments here or open a pull request in <a href="https://github.com/gigiigig/blog">GitHub</a>, the code of this website is open source .</p>
