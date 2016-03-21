@@ -191,7 +191,7 @@ println(s&quot;res: ${res}&quot;)
 // res: Option[List[1: Int, 3: Int, 6: Int]]</code></pre>
 <p>Let’s look a this example to understand how this works, first we defined <code>intPrinter</code> which is an implicit <code>val</code> similar to the ones in the previous examples, now we go to the interesting ones, <code>optionPrinter</code> and <code>listPrinter</code> are not printer for a specific type like<code>Int</code>, they are printer for containers type, <code>Option</code> and <code>List</code>, which both take a type parameter. (when a type take type parameters like <code>List[T]</code> is also called type constructor)</p>
 <p>In these cases we can define the implicit for them as <code>def</code> instead of <code>val</code> and we add a type parameter <code>V</code>, we resolve implicitly the printer for the type <code>V</code> that we use to print the content of our containers, and the compiler we’ll go on resolving the implicits until it finds an implicit <code>val</code> that stops the resolution.</p>
-<p>Le us see what happens when we call <code>print(Option(List(1, 3, 6)))</code> in this example:</p>
+<p>Let us see what happens when we call <code>print(Option(List(1, 3, 6)))</code> in this example:</p>
 <ul>
 <li>the first type to be resolve is <code>Option[V]</code>, so we get <code>optionPrinter</code> and in this case<br />
 <code>V = List</code></li>
