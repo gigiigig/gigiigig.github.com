@@ -100,7 +100,7 @@
 def foo(implicit i: Int) = println(i)
 foo</code></pre>
 <p>This will print 3, nothing interesting so far, this technique is mostly used when we need some kind of context, a typical example is the <code>ExecutionContext</code> that we need when we use <code>Future</code>, <code>Future.map</code> for instance is defined in this way: <code>def map[S](f: T =&gt; S)(implicit executor: ExecutionContext): Future[S]</code></p>
-<p>Let’s go now into the interesting part, implicits parameters are resolved also when we add type parameters:</p>
+<p>Let’s go now into the interesting part, implicit parameters are resolved also when we add type parameters:</p>
 <pre><code>trait Printer[T] {
   def print(t: T): String
 }
@@ -114,7 +114,7 @@ def foo[T](t: T)(implicit p: Printer[T]) = p.print(t)
 val res = foo(3)
 // val res = foo(false)
 println(s&quot;res: ${res}&quot;)</code></pre>
-<p>From this example wee see that the compiler is able to resolve implicits even when there are type parameters, and indeed <code>foo(3)</code> will work properly, while for instance <code>foo(true)</code> won’t compile because there isn’t an instance of <code>Printer[Boolean]</code> available in scope, note that we don’t need to specify the type of <code>T</code>, thanks to the type inference the compiler is able to figure it out, and look for the appropriate <code>Printer</code> instance.</p>
+<p>From this example we see that the compiler is able to resolve implicits even when there are type parameters, and indeed <code>foo(3)</code> will work properly, while for instance <code>foo(true)</code> won’t compile because there isn’t an instance of <code>Printer[Boolean]</code> available in scope, note that we don’t need to specify the type of <code>T</code>, thanks to the type inference the compiler is able to figure it out, and look for the appropriate <code>Printer</code> instance.</p>
 <p>An important thing to remember is that the compiler, when looking for an implicit for a certain type, <code>Printer</code> in the example, will look automatically in his companion object, so we can rewrite this example in this way:</p>
 <pre><code>trait Printer[T] {
   def print(t: T): String
@@ -143,7 +143,7 @@ def foo[T, R](t: T)(implicit p: Resolver[T, R]): R = p.resolve(t)
 
 val res1: Boolean = foo(3)
 val res2: Double = foo(&quot;ciao&quot;)</code></pre>
-<p>As we can see, the function <code>foo</code> now takes two types parameters,<code>T</code> and <code>R</code>, but only <code>T</code> is extracted from the parameter <code>t</code> that we pass, <code>R</code> is instead computed from the implicit resolution, and then we can use it as return type, <code>res1</code> and <code>res2</code> have indeed two different types, depending on the input that we passed. Using implicits here we have been able to do something similar to what we did before with <a href="abstract-types.html">Abstract Types</a>, and we can do much more when we combine this techniques together as we will see later.</p>
+<p>As we can see, the function <code>foo</code> now takes two types parameters,<code>T</code> and <code>R</code>, but only <code>T</code> is extracted from the parameter <code>t</code> that we pass, <code>R</code> is instead computed from the implicit resolution, and then we can use it as return type, <code>res1</code> and <code>res2</code> have indeed two different types, depending on the input that we passed. Using implicits here we have been able to do something similar to what we did before with <a href="abstract-types.html">Abstract Types</a>, and we can do much more when we combine these techniques together as we will see later.</p>
 <h2 id="type-classes">Type Classes</h2>
 <p>Now that we know how to use type parameters and implicits together we can give to this a name, this technique is called <strong>Type Classes</strong>, it is the way Polymorphism is implemented in Haskell, we can encode them in Scala as well, the most common way to do it is basically what we did before, an abstract type that takes one type parameter<br />
 <code>trait Printer[T] { ... }</code> and different implicit implementations in the companion object, there are however other ways to encode them, it’s worth to mention:</p>
@@ -189,11 +189,11 @@ val res = print(Option(List(1, 3, 6)))
 println(s&quot;res: ${res}&quot;)
 
 // res: Option[List[1: Int, 3: Int, 6: Int]]</code></pre>
-<p>Let’s look a this example to understand how this works, first we defined <code>intPrinter</code> which is an implicit <code>val</code> similar to the ones in the previous examples, now we go to the interesting ones, <code>optionPrinter</code> and <code>listPrinter</code> are not printer for a specific type like<code>Int</code>, they are printer for containers type, <code>Option</code> and <code>List</code>, which both take a type parameter. (when a type take type parameters like <code>List[T]</code> is also called type constructor)</p>
-<p>In these cases we can define the implicit for them as <code>def</code> instead of <code>val</code> and we add a type parameter <code>V</code>, we resolve implicitly the printer for the type <code>V</code> that we use to print the content of our containers, and the compiler we’ll go on resolving the implicits until it finds an implicit <code>val</code> that stops the resolution.</p>
+<p>Let’s look at this example to understand how this works, first we defined <code>intPrinter</code> which is an implicit <code>val</code> similar to the ones in the previous examples, now we go to the interesting ones, <code>optionPrinter</code> and <code>listPrinter</code> are not printer for a specific type like<code>Int</code>, they are printer for containers type, <code>Option</code> and <code>List</code>, which both take a type parameter. (when a type take type parameters like <code>List[T]</code> is also called type constructor)</p>
+<p>In these cases we can define the implicit for them as <code>def</code> instead of <code>val</code> and we add a type parameter <code>V</code>, we resolve implicitly the printer for the type <code>V</code> that we use to print the content of our containers, and the compiler will go on resolving the implicits until it finds an implicit <code>val</code> that stops the resolution.</p>
 <p>Let us see what happens when we call <code>print(Option(List(1, 3, 6)))</code> in this example:</p>
 <ul>
-<li>the first type to be resolve is <code>Option[V]</code>, so we get <code>optionPrinter</code> and in this case<br />
+<li>the first type to be resolved is <code>Option[V]</code>, so we get <code>optionPrinter</code> and in this case<br />
 <code>V = List</code></li>
 <li>the compiler then will look for a Printer[List] and resolves <code>listPrinter</code> and now we have <code>V = Int</code></li>
 </ul>
